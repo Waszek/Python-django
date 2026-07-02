@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My django blog</title>
+  </head>
+  <body>
+    <h1>Records from database:</h1>
+
+    <ul>
+      {% for post in posts %}
+      <li>
+        <strong>{{ post.title }}</strong>
+        - author: {{ post.user.name }} (Company: {{ post.user.company }})
+      </li>
+      {% empty %}
+      <li>No record in database.</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
