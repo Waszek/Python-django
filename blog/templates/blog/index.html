@@ -2,19 +2,39 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
-    <title>My django blog</title>
+    <title>Blog in Django</title>
   </head>
   <body>
-    <h1>Records from database:</h1>
+    <h1>Blog in Django</h1>
 
+    <h3>Add new post:</h3>
+    <form method="POST">
+      {% csrf_token %} <label for="title">Post title:</label><br />
+      <input type="text" id="title" name="title" required /><br /><br />
+
+      <label for="user_id">Author:</label><br />
+      <select id="user_id" name="user_id">
+        {% for user in users %}
+        <option value="{{ user.id }}">
+          {{ user.name }} ({{ user.company }})
+        </option>
+        {% endfor %}</select
+      ><br /><br />
+
+      <button type="submit">Share post</button>
+    </form>
+
+    <hr />
+
+    <h3>Post from database:</h3>
     <ul>
       {% for post in posts %}
       <li>
         <strong>{{ post.title }}</strong>
-        - author: {{ post.user.name }} (Company: {{ post.user.company }})
+        - autor: {{ post.user.name }} (Firma: {{ post.user.company }})
       </li>
       {% empty %}
-      <li>No record in database.</li>
+      <li>No posts in database.</li>
       {% endfor %}
     </ul>
   </body>
