@@ -37,3 +37,12 @@ class BlogViewTests(TestCase):
     def test_api_post_method_not_allowed(self):
         respones = self.client.post(reverse('api_post'))
         self.assertEqual(respones.status_code, 405)
+
+    def test_drf_post_list_create(self):
+        payload = {
+            'title': 'Test post from pytest'
+        }
+        response = self.client.post(reverse('drf_post_list'), data=payload)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['title'], 'Test post from pytest')
+        self.assertEqual(response.json()['user'], self.user.name)

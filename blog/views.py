@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from .models import Post, BlogUser
 from django.http import JsonResponse, HttpResponseNotAllowed
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import PostSerializer
+from rest_framework import status
 
 def index(request):
     #Create new post by user
@@ -23,6 +27,7 @@ def index(request):
     }
     return render(request, 'blog/index.html', context)
 
+# convert data to JSON manually
 def api_post(request):
 
     if request.method != "GET":
@@ -44,4 +49,21 @@ def api_post(request):
        
     return JsonResponse(data)
     
+# convert data to JSON by DRF serializer
+@api_view(['GET', 'POST'])
+def drf_post_list(request):
+    if request.method == 'GET':
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
 
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = PostSerializer(data=request.data)
+
+        if serializer.is_valid():
+            first_name = BlogUser.objects.first()
+            serializer.save(user=first_name)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
