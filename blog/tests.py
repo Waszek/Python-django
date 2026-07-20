@@ -46,3 +46,17 @@ class BlogViewTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()['title'], 'Test post from pytest')
         self.assertEqual(response.json()['user'], self.user.name)
+
+    def test_drf_post_update(self):
+        payload = {
+            'title': 'Test title',
+        }
+        response = self.client.put(reverse('drf_post_detail', kwargs={'pk': self.post.id}), data=payload, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['title'], 'Test title')
+        
+    def test_drf_post_delete(self):
+        response = self.client.delete(reverse('drf_post_detail', kwargs={'pk': self.post.id}))
+        self.assertEqual(response.status_code, 204)
+        deleted_post = Post.objects.filter(id=self.post.id).exists()
+        self.assertFalse(deleted_post)
