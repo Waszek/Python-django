@@ -33,3 +33,7 @@ class BlogViewTests(TestCase):
         self.assertEqual(Post.objects.count(), starting_post_count + 1)
         post_exists = Post.objects.filter(title='Post send by automated test').exists()
         self.assertTrue(post_exists)
+
+    def test_api_post_method_not_allowed(self):
+        respones = self.client.post(reverse('api_post'))
+        self.assertEqual(respones.status_code, 405)
