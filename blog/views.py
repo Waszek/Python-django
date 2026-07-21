@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import status
+from rest_framework import viewsets
 from .serializers import PostSerializer
 
 def index(request):
@@ -139,3 +140,12 @@ class PostDetailsAPIView(APIView):
 class GenericPostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+#converted data by viewSets
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    def perform_create(self, serializer):
+        user = BlogUser.objects.first()
+        serializer.save(user=user)
