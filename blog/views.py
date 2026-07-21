@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse, HttpResponseNotAllowed
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework import status
 from .serializers import PostSerializer
 
@@ -49,7 +51,7 @@ def api_post(request):
     }
        
     return JsonResponse(data)
-    
+
 # convert data to JSON by DRF serializer
 @api_view(['GET', 'POST'])
 def drf_post_list(request):
@@ -68,7 +70,8 @@ def drf_post_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 @api_view(['GET', 'PUT', 'DELETE'])
 def drf_post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
@@ -87,3 +90,52 @@ def drf_post_detail(request, pk):
     if request.method == 'DELETE':
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+#converted data by APIView class
+class PostListAPIView(APIView):
+    def get_serializer(self, *args, **kwargs):
+        return PostSerializer(*args, **kwargs)
+
+    def get(self, request):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            first_name = BlogUser.objects.first()
+            serializer.save(user=first_name)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class PostDetailsAPIView(APIView):
+    def get_serializer(self, *args, **kwargs):
+        return PostSerializer(*args, **kwargs)
+    
+    def get_object(self, pk):
+        return get_object_or_404(Post, pk=pk)
+
+    def get(self, request, pk):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        post = self.get_object(pk)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+#converted data by generics
+class GenericPostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
