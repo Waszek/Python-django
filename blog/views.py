@@ -1,14 +1,17 @@
 from .models import Post, BlogUser
+from .serializers import PostSerializer
+from .permissions import IsOwnerOrReadOnly
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse, HttpResponseNotAllowed
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
-from .serializers import PostSerializer
 
 def index(request):
     #Create new post by user
@@ -145,7 +148,8 @@ class GenericPostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        user = BlogUser.objects.first()
+        user =  BlogUser.objects.get(name=self.request.user.username)
         serializer.save(user=user)
